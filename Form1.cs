@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using System.Buffers;
 
 using Microsoft.Azure.Kinect.Sensor;
@@ -16,27 +11,24 @@ using Microsoft.Azure.Kinect.BodyTracking;
 using Image = Microsoft.Azure.Kinect.Sensor.Image;
 using BitmapData = System.Drawing.Imaging.BitmapData;
 
-using K4A = Microsoft.Azure.Kinect.Sensor;
-using K4ABT = Microsoft.Azure.Kinect.BodyTracking;
-
 
 
 namespace AzureKineticTest_1
 {
     public partial class Form1 : Form
     {
-        private Device kinectForColorDepth;
-        //private Device kinectForBodtTraking;
-        private DeviceConfiguration deviceConfigurationForColorDepth, deviceConfigurationForBodyTraking;
+        private Device kinectDevice;
+        private DeviceConfiguration deviceConfigurationForColorDepth;
 
         private Bitmap colorBitmap;
         private Bitmap depthBitmap;
 
-        private bool isLoop;
+        private bool isActive;
 
         private Tracker tracker;
-        
 
+        private List<Dictionary<JointId, Joint>> jointData; 
+        
 
 
         public Form1()
@@ -44,25 +36,23 @@ namespace AzureKineticTest_1
             InitializeComponent();
 
             InitKinect();
-            InitBitMap();
-
-            isLoop = true;
-            CalculateColor();
-            CalculateDepth();
-            CalcuateBodyTraking();
 
         }
         ~Form1()
         {
-            kinectForColorDepth.StopCameras();
-            isLoop = false;
+            kinectDevice.StopCameras();
+            kinectDevice.Dispose();
+
+            tracker.Dispose();
+
+            isActive = false;
         }
 
         private async Task CalculateColor()
         {
-            while (isLoop)
+            while (isActive)
             {
-                using (Microsoft.Azure.Kinect.Sensor.Capture capture = await Task.Run(() => kinectForColorDepth.GetCapture()).ConfigureAwait(true))
+                using (Microsoft.Azure.Kinect.Sensor.Capture capture = await Task.Run(() => kinectDevice.GetCapture()).ConfigureAwait(true))
                 {
                     unsafe
                     {
@@ -71,7 +61,6 @@ namespace AzureKineticTest_1
                         using (MemoryHandle pin = colorImage.Memory.Pin())
                         {
                             colorBitmap = new Bitmap(colorImage.WidthPixels, colorImage.HeightPixels, colorImage.StrideBytes, System.Drawing.Imaging.PixelFormat.Format32bppArgb, (IntPtr)pin.Pointer);
-                            //depthBitmap = new Bitmap(depthImage.WidthPixels, depthImage.HeightPixels, colorImage.StrideBytes, System.Drawing.Imaging.PixelFormat.Format32bppArgb, (IntPtr)pin.Pointer);
                         }
 
                         pictureBox_Color.Image = colorBitmap;
@@ -80,12 +69,14 @@ namespace AzureKineticTest_1
                     Update();
                 }
             }
+
+            return;
         }
         private async Task CalculateDepth()
         {
-            while(isLoop)
+            while(isActive)
             {
-                using (Microsoft.Azure.Kinect.Sensor.Capture capture = await Task.Run(() => kinectForColorDepth.GetCapture()).ConfigureAwait(true))
+                using (Capture capture = await Task.Run(() => kinectDevice.GetCapture()).ConfigureAwait(true))
                 {
                     unsafe
                     {
@@ -125,10 +116,12 @@ namespace AzureKineticTest_1
                     Update();
                 }
             }
+
+            return;
         }
         private async Task CalcuateBodyTraking()
         {
-            var calibration = kinectForColorDepth.GetCalibration(deviceConfigurationForColorDepth.DepthMode, deviceConfigurationForColorDepth.ColorResolution);
+            var calibration = kinectDevice.GetCalibration(deviceConfigurationForColorDepth.DepthMode, deviceConfigurationForColorDepth.ColorResolution);
 
             TrackerConfiguration trackerConfiguration = new TrackerConfiguration()
             {
@@ -136,112 +129,66 @@ namespace AzureKineticTest_1
                 SensorOrientation = SensorOrientation.Default
             };
 
-            tracker = K4ABT.Tracker.Create(
+            tracker = Tracker.Create(
                 calibration,
-                new K4ABT.TrackerConfiguration
+                new TrackerConfiguration
                 {
-                    SensorOrientation = K4ABT.SensorOrientation.Default,
-                    ProcessingMode = K4ABT.TrackerProcessingMode.Gpu
+                    SensorOrientation = SensorOrientation.Default,
+                    ProcessingMode = TrackerProcessingMode.Gpu
                 }
             );
 
-            //System.Numerics.Vector2?[] vectors = new System.Numerics.Vector2?[31];
 
-            while (isLoop)
+            while (isActive)
             {
-                //using (var traker = Tracker.Create(calibration, trackerConfiguration))
-                //{
-                //    while(isLoop)
-                //    {
-                //        using(Microsoft.Azure.Kinect.Sensor.Capture capture = kinectForBodtTraking.GetCapture())
-                //        {
-                //            traker.EnqueueCapture(capture);
-                //        }
-
-                //        using(Frame frame = traker.PopResult(TimeSpan.Zero, false))
-                //        {
-                //            if(frame != null && frame.NumberOfBodies > 0)
-                //            {
-                //                Skeleton skeleton = frame.GetBodySkeleton(0);
-                //                Joint joint = skeleton.GetJoint(JointId.Head);
-                //                textBox1.Text = "X : " + joint.Position.X + " / Y : " + joint.Position.Y + " / Z : " + joint.Position.Z;
-                //            }
-                //        }
-                //    }
-                //}
-                using (K4A.Capture capture = await Task.Run(() => { return kinectForColorDepth.GetCapture(); }))
+                using (Capture capture = await Task.Run(() => { return kinectDevice.GetCapture(); }))
                 {
-                    // Enque Capture
                     tracker.EnqueueCapture(capture);
 
-                    // Pop Result
-                    using (K4ABT.Frame frame = tracker.PopResult())
-                    // Get Color Image
-                    using (K4A.Image color_image = frame.Capture.Color)
+                    using (Frame frame = tracker.PopResult())
+                    using (Image color_image = frame.Capture.Color)
                     {
-                        //// Get Color Buffer and Write Bitmap
-                        //byte[] color_buffer = color_image.Memory.ToArray();
-                        //color_bitmap.WritePixels(color_rect, color_buffer, color_stride, 0, 0);
+                        textBox_BodyTraking.Text = null;
 
-                        //// Clear All Ellipse from Canvas
-                        //Canvas_Body.Children.Clear();
+                        jointData.Clear();
 
-                        textBox1.Text = null;
-
-                        // Draw Skeleton
-                        for (uint body_index = 0; body_index < frame.NumberOfBodies; body_index++)
+                        for (uint bodyIndex = 0; bodyIndex < frame.NumberOfBodies; bodyIndex++)
                         {
-                            // Get Skeleton and ID
-                            K4ABT.Skeleton skeleton = frame.GetBodySkeleton(body_index);
-                            uint id = frame.GetBodyId(body_index);
+                            Skeleton skeleton = frame.GetBodySkeleton(bodyIndex);
+                            uint id = frame.GetBodyId(bodyIndex);
 
-                            if(body_index >= 1)
+                            if(bodyIndex >= 1)
                             {
-                                textBox1.Text += Environment.NewLine + "------------------------------------------------------" + Environment.NewLine;
+                                textBox_BodyTraking.Text += Environment.NewLine + "------------------------------------------------------" + Environment.NewLine;
                             }
 
-                            textBox1.Text += "Person Index : " + body_index + Environment.NewLine;
+                            textBox_BodyTraking.Text += "Person Index : " + bodyIndex + Environment.NewLine;
 
-                            // Draw Joints
-                            for (int joint_index = 0; joint_index < (int)K4ABT.JointId.Count; joint_index++)
+                            jointData.Add(new Dictionary<JointId, Joint>());
+
+                            for (int jointIndex = 0; jointIndex < (int)JointId.Count; jointIndex++)
                             {
-                                // Get Joint and Position
-                                K4ABT.Joint joint = skeleton.GetJoint(joint_index);
-                                //System.Numerics.Vector2? position = calibration.TransformTo2D(joint.Position, K4A.CalibrationDeviceType.Depth, K4A.CalibrationDeviceType.Color);
+                                Joint joint = skeleton.GetJoint(jointIndex);
 
-                                //if (!position.HasValue)
-                                //{
-                                //    continue;
-                                //}
+                                textBox_BodyTraking.Text += "Joint Index : " + jointIndex + "   -   X : " + joint.Position.X + " / Y : " + joint.Position.Y + " / Z : " + joint.Position.Z + Environment.NewLine;
 
-                                //// Create Ellipse
-                                //const int radius = 10;
-                                //SolidColorBrush stroke_color = new SolidColorBrush(colors[id % colors.Length]);
-                                //SolidColorBrush fill_color = new SolidColorBrush((joint.ConfidenceLevel >= K4ABT.JointConfidenceLevel.Medium) ? colors[id % colors.Length] : Colors.Transparent);
-                                //Ellipse ellipse = new Ellipse() { Width = radius, Height = radius, StrokeThickness = 1, Stroke = stroke_color, Fill = fill_color };
-
-                                //// Add Ellipse to Canvas
-                                //Canvas.SetLeft(ellipse, position.Value.X - (radius / 2));
-                                //Canvas.SetTop(ellipse, position.Value.Y - (radius / 2));
-                                //Canvas_Body.Children.Add(ellipse);
-
-                                //vectors[joint_index] = position;
-
-                                textBox1.Text += "Joint Index : " + joint_index + "   -   X : " + joint.Position.X + " / Y : " + joint.Position.Y + " / Z : " + joint.Position.Z + Environment.NewLine;
+                                jointData[(int)bodyIndex].Add((JointId)jointIndex, joint);
                             }
                         }
                     }
                 }
             }
+
+            return;
         }
+
         private void InitBitMap()
         {
-            int colorWidth = kinectForColorDepth.GetCalibration().ColorCameraCalibration.ResolutionWidth;
-            int colorHeight = kinectForColorDepth.GetCalibration().ColorCameraCalibration.ResolutionHeight;
+            int colorWidth = kinectDevice.GetCalibration().ColorCameraCalibration.ResolutionWidth;
+            int colorHeight = kinectDevice.GetCalibration().ColorCameraCalibration.ResolutionHeight;
 
-            int depthWidth = kinectForColorDepth.GetCalibration().DepthCameraCalibration.ResolutionWidth;
-            int depthheight = kinectForColorDepth.GetCalibration().DepthCameraCalibration.ResolutionHeight;
-
+            int depthWidth = kinectDevice.GetCalibration().DepthCameraCalibration.ResolutionWidth;
+            int depthheight = kinectDevice.GetCalibration().DepthCameraCalibration.ResolutionHeight;
 
 
             colorBitmap = new Bitmap(colorWidth, colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -249,23 +196,118 @@ namespace AzureKineticTest_1
         }
         private void InitKinect()
         {
-            kinectForColorDepth = Device.Open(0);
-            //kinectForBodtTraking = Device.Open(0);
-
-            deviceConfigurationForColorDepth = new DeviceConfiguration()
+            try
             {
-                ColorFormat = ImageFormat.ColorBGRA32,
-                ColorResolution = ColorResolution.R720p,
-                DepthMode = DepthMode.NFOV_2x2Binned,
-                SynchronizedImagesOnly = true
-            };
-            //deviceConfigurationForBodyTraking = new DeviceConfiguration()
-            //{
-            //    ColorResolution = ColorResolution.Off,
-            //    DepthMode = DepthMode.NFOV_2x2Binned
-            //};
-            kinectForColorDepth.StartCameras(deviceConfigurationForColorDepth);
-            //kinectForBodtTraking.StartCameras(deviceConfigurationForColorDepth);
+                kinectDevice = Device.Open(0);
+
+                deviceConfigurationForColorDepth = new DeviceConfiguration()
+                {
+                    ColorFormat = ImageFormat.ColorBGRA32,
+                    ColorResolution = ColorResolution.R720p,
+                    DepthMode = DepthMode.NFOV_2x2Binned,
+                    CameraFPS = FPS.FPS15,
+                    SynchronizedImagesOnly = true
+                };
+            }
+            catch (AzureKinectException ex)
+            {
+                textBox_Error.Text += "Exception is occur during open kinect device" + Environment.NewLine + "Please check your device wire connection" + Environment.NewLine;
+                textBox_Error.Text += ex.ToString() + Environment.NewLine;
+            }
+        }
+
+        private void button_CameraCapture_Click(object sender, EventArgs e)
+        {
+            if(!isActive)
+            {
+                isActive = true;
+
+                kinectDevice.StartCameras(deviceConfigurationForColorDepth);
+
+                InitBitMap();
+
+                if (checkBox_Color.Checked)
+                {
+                    CalculateColor();
+                }
+                if(checkBox_Depth.Checked)
+                {
+                    CalculateDepth();
+                }
+                if(checkBox_BodyTraking.Checked)
+                {
+                    CalcuateBodyTraking();
+
+                    if(jointData == null)
+                    {
+                        jointData = new List<Dictionary<JointId, Joint>>();
+                    }
+                }
+
+                textBox_Error.Text += "----- Now Capturing -----" + Environment.NewLine;
+                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture Start : " + Environment.NewLine;
+            }
+            else
+            {
+                isActive = false;
+
+                kinectDevice.StopCameras();
+                tracker.Dispose();
+
+                colorBitmap.Dispose();
+                depthBitmap.Dispose();
+
+                textBox_Error.Text += "----- Capture End -----" + Environment.NewLine + Environment.NewLine;
+            }
+        }
+        private void button_SaveToTxt_Click(object sender, EventArgs e)
+        {
+            string path = System.IO.Path.Combine(@textBox_Path.Text, "BodyTrakingData_" + System.DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss"));
+            bool flag = false;
+
+            try
+            {
+                var fileStream = System.IO.File.Create(path);
+                fileStream.Close();
+
+                lock (jointData)
+                {
+                    System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(jointData));
+                }
+            }
+            catch(Exception ex)
+            {
+                flag = true;
+
+                textBox_Error.Text += "Exception is occur during save body traking data" + Environment.NewLine;
+                textBox_Error.Text += ex.ToString() + Environment.NewLine;
+            }
+
+            if(!flag)
+            {
+                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Body traking data is saved in : " + path + Environment.NewLine;
+            }
+        }
+        private void button_SetFPS5_Click(object sender, EventArgs e)
+        {
+            if(!isActive)
+            {
+                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS5;
+            }
+        }
+        private void button_SetFPS15_Click(object sender, EventArgs e)
+        {
+            if (!isActive)
+            {
+                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS15;
+            }
+        }
+        private void button_SetFPS30_Click(object sender, EventArgs e)
+        {
+            if (!isActive)
+            {
+                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS30;
+            }
         }
     }
 }
