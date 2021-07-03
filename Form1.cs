@@ -18,7 +18,7 @@ namespace AzureKineticTest_1
     public partial class Form1 : Form
     {
         private Device kinectDevice;
-        private DeviceConfiguration deviceConfigurationForColorDepth;
+        private DeviceConfiguration deviceConfiguration;
 
         private Bitmap colorBitmap;
         private Bitmap depthBitmap;
@@ -121,7 +121,7 @@ namespace AzureKineticTest_1
         }
         private async Task CalcuateBodyTraking()
         {
-            var calibration = kinectDevice.GetCalibration(deviceConfigurationForColorDepth.DepthMode, deviceConfigurationForColorDepth.ColorResolution);
+            var calibration = kinectDevice.GetCalibration(deviceConfiguration.DepthMode, deviceConfiguration.ColorResolution);
 
             TrackerConfiguration trackerConfiguration = new TrackerConfiguration()
             {
@@ -200,7 +200,7 @@ namespace AzureKineticTest_1
             {
                 kinectDevice = Device.Open(0);
 
-                deviceConfigurationForColorDepth = new DeviceConfiguration()
+                deviceConfiguration = new DeviceConfiguration()
                 {
                     ColorFormat = ImageFormat.ColorBGRA32,
                     ColorResolution = ColorResolution.R720p,
@@ -222,7 +222,7 @@ namespace AzureKineticTest_1
             {
                 isActive = true;
 
-                kinectDevice.StartCameras(deviceConfigurationForColorDepth);
+                kinectDevice.StartCameras(deviceConfiguration);
 
                 InitBitMap();
 
@@ -292,21 +292,21 @@ namespace AzureKineticTest_1
         {
             if(!isActive)
             {
-                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS5;
+                deviceConfiguration.CameraFPS = FPS.FPS5;
             }
         }
         private void button_SetFPS15_Click(object sender, EventArgs e)
         {
             if (!isActive)
             {
-                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS15;
+                deviceConfiguration.CameraFPS = FPS.FPS15;
             }
         }
         private void button_SetFPS30_Click(object sender, EventArgs e)
         {
             if (!isActive)
             {
-                deviceConfigurationForColorDepth.CameraFPS = FPS.FPS30;
+                deviceConfiguration.CameraFPS = FPS.FPS30;
             }
         }
     }

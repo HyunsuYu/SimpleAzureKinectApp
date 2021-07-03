@@ -109,6 +109,7 @@
             this.textBox_Error.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_Error.Size = new System.Drawing.Size(683, 136);
             this.textBox_Error.TabIndex = 6;
+            this.textBox_Error.Text = "===Output===\r\n";
             // 
             // checkBox_Color
             // 
