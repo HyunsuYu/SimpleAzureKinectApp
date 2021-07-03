@@ -119,7 +119,7 @@ namespace AzureKineticTest_1
 
             return;
         }
-        private async Task CalcuateBodyTraking()
+        private async Task CalcuateBodyTracking()
         {
             var calibration = kinectDevice.GetCalibration(deviceConfiguration.DepthMode, deviceConfiguration.ColorResolution);
 
@@ -148,7 +148,7 @@ namespace AzureKineticTest_1
                     using (Frame frame = tracker.PopResult())
                     using (Image color_image = frame.Capture.Color)
                     {
-                        textBox_BodyTraking.Text = null;
+                        textBox_BodyTracking.Text = null;
 
                         jointData.Clear();
 
@@ -159,10 +159,10 @@ namespace AzureKineticTest_1
 
                             if(bodyIndex >= 1)
                             {
-                                textBox_BodyTraking.Text += Environment.NewLine + "------------------------------------------------------" + Environment.NewLine;
+                                textBox_BodyTracking.Text += Environment.NewLine + "------------------------------------------------------" + Environment.NewLine;
                             }
 
-                            textBox_BodyTraking.Text += "Person Index : " + bodyIndex + Environment.NewLine;
+                            textBox_BodyTracking.Text += "Person Index : " + bodyIndex + Environment.NewLine;
 
                             jointData.Add(new Dictionary<JointId, Joint>());
 
@@ -170,7 +170,7 @@ namespace AzureKineticTest_1
                             {
                                 Joint joint = skeleton.GetJoint(jointIndex);
 
-                                textBox_BodyTraking.Text += "Joint Index : " + jointIndex + "   -   X : " + joint.Position.X + " / Y : " + joint.Position.Y + " / Z : " + joint.Position.Z + Environment.NewLine;
+                                textBox_BodyTracking.Text += "Joint Index : " + jointIndex + "   -   X : " + joint.Position.X + " / Y : " + joint.Position.Y + " / Z : " + joint.Position.Z + Environment.NewLine;
 
                                 jointData[(int)bodyIndex].Add((JointId)jointIndex, joint);
                             }
@@ -211,7 +211,7 @@ namespace AzureKineticTest_1
             }
             catch (AzureKinectException ex)
             {
-                textBox_Error.Text += "Exception is occur during open kinect device" + Environment.NewLine + "Please check your device wire connection" + Environment.NewLine;
+                textBox_Error.Text += "1> Exception is occur during open kinect device" + Environment.NewLine + "1> Please check your device wire connection" + Environment.NewLine;
                 textBox_Error.Text += ex.ToString() + Environment.NewLine;
             }
         }
@@ -226,26 +226,41 @@ namespace AzureKineticTest_1
 
                 InitBitMap();
 
+                bool flag = true;
                 if (checkBox_Color.Checked)
                 {
+                    flag = false;
+
                     CalculateColor();
                 }
                 if(checkBox_Depth.Checked)
                 {
+                    flag = false;
+
                     CalculateDepth();
                 }
-                if(checkBox_BodyTraking.Checked)
+                if(checkBox_BodyTracking.Checked)
                 {
-                    CalcuateBodyTraking();
+                    flag = false;
+
+                    CalcuateBodyTracking();
 
                     if(jointData == null)
                     {
                         jointData = new List<Dictionary<JointId, Joint>>();
                     }
                 }
-
-                textBox_Error.Text += "----- Now Capturing -----" + Environment.NewLine;
-                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture Start : " + Environment.NewLine;
+                
+                if(flag)
+                {
+                    textBox_Error.Text += "=== No check box selected ===" + Environment.NewLine;
+                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture fail time : " + Environment.NewLine;
+                }
+                else
+                {
+                    textBox_Error.Text += "=== Capture start ===" + Environment.NewLine;
+                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture start time : " + Environment.NewLine;
+                }
             }
             else
             {
@@ -257,35 +272,39 @@ namespace AzureKineticTest_1
                 colorBitmap.Dispose();
                 depthBitmap.Dispose();
 
-                textBox_Error.Text += "----- Capture End -----" + Environment.NewLine + Environment.NewLine;
+                textBox_Error.Text += "=== Capture end ===" + Environment.NewLine;
+                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture end time : " + Environment.NewLine + Environment.NewLine;
             }
         }
         private void button_SaveToTxt_Click(object sender, EventArgs e)
         {
-            string path = System.IO.Path.Combine(@textBox_Path.Text, "BodyTrakingData_" + System.DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss"));
-            bool flag = false;
-
-            try
+            if(checkBox_BodyTracking.Checked)
             {
-                var fileStream = System.IO.File.Create(path);
-                fileStream.Close();
+                string path = System.IO.Path.Combine(@textBox_Path.Text, "BodyTrakingData_" + System.DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss"));
+                bool flag = false;
 
-                lock (jointData)
+                try
                 {
-                    System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(jointData));
+                    var fileStream = System.IO.File.Create(path);
+                    fileStream.Close();
+
+                    lock (jointData)
+                    {
+                        System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(jointData));
+                    }
                 }
-            }
-            catch(Exception ex)
-            {
-                flag = true;
+                catch (Exception ex)
+                {
+                    flag = true;
 
-                textBox_Error.Text += "Exception is occur during save body traking data" + Environment.NewLine;
-                textBox_Error.Text += ex.ToString() + Environment.NewLine;
-            }
+                    textBox_Error.Text += "1> Exception is occur during save body traking data" + Environment.NewLine;
+                    textBox_Error.Text += ex.ToString() + Environment.NewLine;
+                }
 
-            if(!flag)
-            {
-                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Body traking data is saved in : " + path + Environment.NewLine;
+                if (!flag)
+                {
+                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Body traking data is saved in : " + path + Environment.NewLine;
+                }
             }
         }
         private void button_SetFPS5_Click(object sender, EventArgs e)

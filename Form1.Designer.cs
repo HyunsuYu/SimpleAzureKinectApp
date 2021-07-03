@@ -30,14 +30,14 @@
         {
             this.pictureBox_Color = new System.Windows.Forms.PictureBox();
             this.pictureBox_Depth = new System.Windows.Forms.PictureBox();
-            this.textBox_BodyTraking = new System.Windows.Forms.TextBox();
+            this.textBox_BodyTracking = new System.Windows.Forms.TextBox();
             this.textBox_Path = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button_SaveToTxt = new System.Windows.Forms.Button();
             this.textBox_Error = new System.Windows.Forms.TextBox();
             this.checkBox_Color = new System.Windows.Forms.CheckBox();
             this.checkBox_Depth = new System.Windows.Forms.CheckBox();
-            this.checkBox_BodyTraking = new System.Windows.Forms.CheckBox();
+            this.checkBox_BodyTracking = new System.Windows.Forms.CheckBox();
             this.button_CameraCapture = new System.Windows.Forms.Button();
             this.button_SetFPS30 = new System.Windows.Forms.Button();
             this.button_SetFPS15 = new System.Windows.Forms.Button();
@@ -48,6 +48,7 @@
             // 
             // pictureBox_Color
             // 
+            this.pictureBox_Color.BackColor = System.Drawing.Color.White;
             this.pictureBox_Color.Location = new System.Drawing.Point(12, 70);
             this.pictureBox_Color.Name = "pictureBox_Color";
             this.pictureBox_Color.Size = new System.Drawing.Size(300, 300);
@@ -57,6 +58,7 @@
             // 
             // pictureBox_Depth
             // 
+            this.pictureBox_Depth.BackColor = System.Drawing.Color.White;
             this.pictureBox_Depth.Location = new System.Drawing.Point(12, 376);
             this.pictureBox_Depth.Name = "pictureBox_Depth";
             this.pictureBox_Depth.Size = new System.Drawing.Size(300, 300);
@@ -64,15 +66,15 @@
             this.pictureBox_Depth.TabIndex = 1;
             this.pictureBox_Depth.TabStop = false;
             // 
-            // textBox_BodyTraking
+            // textBox_BodyTracking
             // 
-            this.textBox_BodyTraking.Location = new System.Drawing.Point(318, 70);
-            this.textBox_BodyTraking.Multiline = true;
-            this.textBox_BodyTraking.Name = "textBox_BodyTraking";
-            this.textBox_BodyTraking.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_BodyTraking.Size = new System.Drawing.Size(683, 464);
-            this.textBox_BodyTraking.TabIndex = 2;
-            this.textBox_BodyTraking.Text = "\r\n";
+            this.textBox_BodyTracking.Location = new System.Drawing.Point(318, 70);
+            this.textBox_BodyTracking.Multiline = true;
+            this.textBox_BodyTracking.Name = "textBox_BodyTracking";
+            this.textBox_BodyTracking.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_BodyTracking.Size = new System.Drawing.Size(683, 464);
+            this.textBox_BodyTracking.TabIndex = 2;
+            this.textBox_BodyTracking.Text = "\r\n";
             // 
             // textBox_Path
             // 
@@ -97,7 +99,7 @@
             this.button_SaveToTxt.Name = "button_SaveToTxt";
             this.button_SaveToTxt.Size = new System.Drawing.Size(156, 23);
             this.button_SaveToTxt.TabIndex = 5;
-            this.button_SaveToTxt.Text = "Save Body Traking Data";
+            this.button_SaveToTxt.Text = "Save Body Tracking Data";
             this.button_SaveToTxt.UseVisualStyleBackColor = true;
             this.button_SaveToTxt.Click += new System.EventHandler(this.button_SaveToTxt_Click);
             // 
@@ -109,7 +111,7 @@
             this.textBox_Error.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_Error.Size = new System.Drawing.Size(683, 136);
             this.textBox_Error.TabIndex = 6;
-            this.textBox_Error.Text = "===Output===\r\n";
+            this.textBox_Error.Text = "=== Output ===\r\n";
             // 
             // checkBox_Color
             // 
@@ -135,17 +137,17 @@
             this.checkBox_Depth.Text = "Active Depth";
             this.checkBox_Depth.UseVisualStyleBackColor = true;
             // 
-            // checkBox_BodyTraking
+            // checkBox_BodyTracking
             // 
-            this.checkBox_BodyTraking.AutoSize = true;
-            this.checkBox_BodyTraking.Checked = true;
-            this.checkBox_BodyTraking.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_BodyTraking.Location = new System.Drawing.Point(212, 12);
-            this.checkBox_BodyTraking.Name = "checkBox_BodyTraking";
-            this.checkBox_BodyTraking.Size = new System.Drawing.Size(133, 19);
-            this.checkBox_BodyTraking.TabIndex = 9;
-            this.checkBox_BodyTraking.Text = "Active Body Traking";
-            this.checkBox_BodyTraking.UseVisualStyleBackColor = true;
+            this.checkBox_BodyTracking.AutoSize = true;
+            this.checkBox_BodyTracking.Checked = true;
+            this.checkBox_BodyTracking.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_BodyTracking.Location = new System.Drawing.Point(212, 12);
+            this.checkBox_BodyTracking.Name = "checkBox_BodyTracking";
+            this.checkBox_BodyTracking.Size = new System.Drawing.Size(139, 19);
+            this.checkBox_BodyTracking.TabIndex = 9;
+            this.checkBox_BodyTracking.Text = "Active Body Tracking";
+            this.checkBox_BodyTracking.UseVisualStyleBackColor = true;
             // 
             // button_CameraCapture
             // 
@@ -196,18 +198,18 @@
             this.Controls.Add(this.button_SetFPS15);
             this.Controls.Add(this.button_SetFPS30);
             this.Controls.Add(this.button_CameraCapture);
-            this.Controls.Add(this.checkBox_BodyTraking);
+            this.Controls.Add(this.checkBox_BodyTracking);
             this.Controls.Add(this.checkBox_Depth);
             this.Controls.Add(this.checkBox_Color);
             this.Controls.Add(this.textBox_Error);
             this.Controls.Add(this.button_SaveToTxt);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox_Path);
-            this.Controls.Add(this.textBox_BodyTraking);
+            this.Controls.Add(this.textBox_BodyTracking);
             this.Controls.Add(this.pictureBox_Depth);
             this.Controls.Add(this.pictureBox_Color);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Simple Azure Kinect Manager";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Color)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Depth)).EndInit();
             this.ResumeLayout(false);
@@ -219,14 +221,14 @@
 
         private System.Windows.Forms.PictureBox pictureBox_Color;
         private System.Windows.Forms.PictureBox pictureBox_Depth;
-        private System.Windows.Forms.TextBox textBox_BodyTraking;
+        private System.Windows.Forms.TextBox textBox_BodyTracking;
         private System.Windows.Forms.TextBox textBox_Path;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button button_SaveToTxt;
         private System.Windows.Forms.TextBox textBox_Error;
         private System.Windows.Forms.CheckBox checkBox_Color;
         private System.Windows.Forms.CheckBox checkBox_Depth;
-        private System.Windows.Forms.CheckBox checkBox_BodyTraking;
+        private System.Windows.Forms.CheckBox checkBox_BodyTracking;
         private System.Windows.Forms.Button button_CameraCapture;
         private System.Windows.Forms.Button button_SetFPS30;
         private System.Windows.Forms.Button button_SetFPS15;
