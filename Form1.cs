@@ -265,12 +265,12 @@ namespace AzureKineticTest_1
                 if(flag)
                 {
                     textBox_Error.Text += "=== No check box selected ===" + Environment.NewLine;
-                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture fail time : " + Environment.NewLine;
+                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture fail time" + Environment.NewLine;
                 }
                 else
                 {
                     textBox_Error.Text += "=== Capture start ===" + Environment.NewLine;
-                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture start time : " + Environment.NewLine;
+                    textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture start time" + Environment.NewLine;
                 }
             }
             else
@@ -284,7 +284,7 @@ namespace AzureKineticTest_1
                 depthBitmap.Dispose();
 
                 textBox_Error.Text += "=== Capture end ===" + Environment.NewLine;
-                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture end time : " + Environment.NewLine + Environment.NewLine;
+                textBox_Error.Text += "[" + System.DateTime.Now.ToString("hh-mm-ss") + "] > Capture end time" + Environment.NewLine + Environment.NewLine;
             }
         }
         private void button_SaveToTxt_Click(object sender, EventArgs e)
