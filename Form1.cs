@@ -211,7 +211,7 @@ namespace AzureKineticTest_1
             }
             catch (AzureKinectException ex)
             {
-                textBox_Error.Text += "1> Exception is occur during open kinect device" + Environment.NewLine + "1> Please check your device wire connection" + Environment.NewLine;
+                textBox_Error.Text += "1> Exception is occur during open kinect device" + Environment.NewLine + "1> Please check your device connection" + Environment.NewLine;
                 textBox_Error.Text += ex.ToString() + Environment.NewLine;
             }
         }
@@ -220,9 +220,20 @@ namespace AzureKineticTest_1
         {
             if(!isActive)
             {
-                isActive = true;
+                
 
-                kinectDevice.StartCameras(deviceConfiguration);
+                try
+                {
+                    kinectDevice.StartCameras(deviceConfiguration);
+                }
+                catch(AzureKinectException ex)
+                {
+                    textBox_Error.Text += "1> Exception is occur during start kinect device" + Environment.NewLine + "1> Please check your device connection" + Environment.NewLine;
+                    textBox_Error.Text += ex.ToString() + Environment.NewLine;
+                }
+
+
+                isActive = true;
 
                 InitBitMap();
 
